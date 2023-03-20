@@ -1,3 +1,4 @@
+import 'package:chat/Screens/ChatScreen/Controller/ChatController.dart';
 import 'package:chat/Utils/MessageWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,9 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+
+  ChatController chatController = Get.put(ChatController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +50,6 @@ class _ChatPageState extends State<ChatPage> {
             child: Container(
               height: Get.height/1.18,
               width: Get.width,
-              padding: EdgeInsets.only(left: Get.width/60, right: Get.width/60, top: Get.width/15),
               decoration: const BoxDecoration(
                   color: Color(0xFFECF4FF),
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(45),topRight: Radius.circular(45))
@@ -57,61 +60,88 @@ class _ChatPageState extends State<ChatPage> {
                     child: SingleChildScrollView(
                       reverse: true,
                       physics: BouncingScrollPhysics(),
-                      child: Column(
-                        children: [
-                          MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                          MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                        ],
+                      child: Padding(
+                        padding: EdgeInsets.only(left: Get.width/30, right: Get.width/30, top: Get.width/15),
+                        child: Column(
+                          children: [
+                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/60,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                            SizedBox(height: Get.width/30,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/60,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                            SizedBox(height: Get.width/60,),
+                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: Get.width/30,),
                   Container(
                     height: Get.width/8,
-                    color: Colors.red,
-                    child: Stack(
+                    // width: Get.width/1.12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30)
+                    ),
+                    margin: EdgeInsets.only(left: Get.width/30, right: Get.width/30,),
+                    child: Row(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            height: Get.width/8,
-                            width: Get.width/1.09,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30)
-                            ),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  onPressed: (){},
-                                  icon: Icon(Icons.emoji_emotions_outlined),
-                                ),
-                                Expanded(
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Type Message Here...."
-                                    ),
-                                  ),
-                                ),
-                              ],
+                        IconButton(
+                          onPressed: (){},
+                          icon: Icon(Icons.emoji_emotions_outlined),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: chatController.txtChat,
+                            onChanged: (value) {
+                              if(value.isNotEmpty)
+                                {
+                                  chatController.ChatStart.value = true;
+                                }
+                              else
+                                {
+                                  chatController.ChatStart.value = false;
+                                }
+                            },
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Type Message Here...."
                             ),
                           ),
                         ),
+                        Container(
+                          height: Get.width/9,
+                          width: Get.width/9,
+                          margin: EdgeInsets.only(right: Get.width/90),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF703efe)
+                          ),
+                          alignment: Alignment.center,
+                          child: Obx(() => Image.asset("${chatController.ChatStart.value ? "assets/image/send.png" : "assets/image/mic.png"}",height: Get.width/15,width: Get.width/15,color: Colors.white,)),
+                        )
                       ],
                     ),
-                  )
+                  ),
+                  SizedBox(height: Get.width/90,)
                 ],
               ),
               // child: ListView.builder(

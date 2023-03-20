@@ -176,17 +176,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: InkWell(
-        onTap: () {
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
         },
         child: Container(
-          height: Get.height/12,
-          width: Get.height/12,
-          decoration: const BoxDecoration(
-            color: Color(0xFF703efe),
-            shape: BoxShape.circle
+          height: 10.h,
+          width: 20.w,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF703efe),
+            boxShadow: [
+              BoxShadow(color: Colors.deepPurple.shade300, blurRadius: 21)
+            ],
           ),
-          child: Icon(Icons.add,size: 30.sp,),
+          child: Icon(Icons.add,size: 25.sp,),
         ),
       ),
     );
