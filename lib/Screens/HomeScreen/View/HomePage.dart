@@ -1,3 +1,4 @@
+import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,12 +37,18 @@ class _HomePageState extends State<HomePage> {
                   alignment: Alignment.center,
                   child: Image.asset("assets/image/menu.png",height: Get.width/12,width: Get.width/12,),
                 ),
-                Text(
-                  "Messages",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold
+                InkWell(
+                  onTap: (){
+                    FirebaseHelper.firebaseHelper.SignOutUser();
+                    Get.offNamed('SignIn');
+                  },
+                  child: Text(
+                    "Messages",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold
+                    ),
                   ),
                 ),
                 Container(

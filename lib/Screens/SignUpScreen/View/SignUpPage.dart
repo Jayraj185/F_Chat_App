@@ -4,6 +4,7 @@ import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:chat/Utils/ToastMessage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -30,7 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   height: Get.height / 3,
                   width: Get.width,
                   alignment: Alignment.center,
-                  child: Text("Welcome",style: TextStyle(color: const Color(0xFF703efe), fontSize: 50.sp, fontWeight: FontWeight.bold),)
+                  child: Text("Welcome F Chat",style: GoogleFonts.lobster(color: const Color(0xFF703efe), fontSize: 36.sp, fontWeight: FontWeight.bold),)
               ),
             ),
             Container(
@@ -255,6 +256,87 @@ class _SignUpPageState extends State<SignUpPage> {
                               fontSize: 15.sp,
                             ),
                           ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: Get.width / 15, right: Get.width / 12),
+                        child: Text(
+                          "-Or Sign Up With",
+                          style: TextStyle(
+                            color: Colors.black38,
+                            fontSize: 9.sp,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: Get.height / 21,
+                        width: Get.width / 2,
+                        // color: Colors.red,
+                        margin: EdgeInsets.only(
+                            right: Get.width / 12, top: Get.width / 21),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                bool isLogin = await FirebaseHelper.firebaseHelper.GoogleLogIn();
+                                if(isLogin)
+                                {
+                                  Get.offNamed('Home');
+                                  Get.snackbar('Congratulation', 'Login Is Successful');
+                                }
+                                else
+                                {
+                                  Get.snackbar('Failed', 'Login Not Successful');
+                                }
+                              },
+                              child: Container(
+                                height: Get.height / 23,
+                                width: Get.height / 23,
+                                alignment: Alignment.center,
+                                child:
+                                Image.asset("assets/image/google_logo.png"),
+                              ),
+                            ),
+                            Container(
+                              height: Get.height / 23,
+                              width: Get.height / 23,
+                              alignment: Alignment.center,
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: Get.width / 50),
+                              child: Text(
+                                "|",
+                                style: TextStyle(
+                                    color: Colors.black38, fontSize: 21.sp),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                bool isLogin = await FirebaseHelper.firebaseHelper.FacebookLogIn();
+                                if(isLogin)
+                                {
+                                  Get.offNamed('Home');
+                                  Get.snackbar('Congratulation', 'Login Is Successful');
+                                }
+                                else
+                                {
+                                  Get.snackbar('Failed', 'Login Not Successful');
+                                }
+                              },
+                              child: Container(
+                                height: Get.height / 22,
+                                width: Get.height / 22,
+                                alignment: Alignment.center,
+                                child: Image.asset(
+                                  "assets/image/facebook.png",
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Padding(
