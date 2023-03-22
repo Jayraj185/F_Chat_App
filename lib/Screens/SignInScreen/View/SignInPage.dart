@@ -1,4 +1,6 @@
+import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
 import 'package:chat/Screens/SignInScreen/Controller/SignInController.dart';
+import 'package:chat/Screens/SplashScreen/Controller/SplashController.dart';
 import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:chat/Utils/ToastMessage.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
 
   SignInController signInController = Get.put(SignInController());
+  SplashController splashController = Get.put(SplashController());
 
   @override
   Widget build(BuildContext context) {
@@ -286,11 +289,12 @@ class _SignInPageState extends State<SignInPage> {
                                 if(isLogin)
                                 {
                                   Get.offNamed('Home');
-                                  Get.snackbar('Congratulation', 'Login Is Successful');
+                                  ToastMessage(msg: "Congratulation Login Successful", color: Colors.green);
+                                  splashController.IsLogin();
                                 }
                                 else
                                 {
-                                  Get.snackbar('Failed', 'Login Not Successful');
+                                  ToastMessage(msg: "Failed Login Not Successful", color: Colors.red);
                                 }
                               },
                               child: Container(

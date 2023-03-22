@@ -1,5 +1,10 @@
 import 'package:chat/Screens/ChatScreen/Controller/ChatController.dart';
+import 'package:chat/Screens/ChatScreen/Model/MessageModel.dart';
+import 'package:chat/Screens/HomeScreen/Controller/HomeController.dart';
+import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
+import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:chat/Utils/MessageWidget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
@@ -14,6 +19,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
 
   ChatController chatController = Get.put(ChatController());
+  HomeController homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +38,13 @@ class _ChatPageState extends State<ChatPage> {
                 IconButton(onPressed: (){Get.back();}, icon: Icon(Icons.arrow_back_ios_new),color: Colors.white,),
                 CircleAvatar(
                   backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage("https://funkylife.in/wp-content/uploads/2023/01/whatsapp-dp-by-funkylife-561-1.jpg"),
+                  backgroundImage: NetworkImage("${homeController.chatUser.image}"),
                   radius: Get.width/15,
                 ),
                 Expanded(
                   child: ListTile(
-                    title: Text("Dharmik Bhaliya", maxLines: 1,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,overflow: TextOverflow.ellipsis),),
-                    subtitle: Text("Online", maxLines: 1,style: TextStyle(color: Colors.green,overflow: TextOverflow.ellipsis),),
+                    title: Text("${homeController.chatUser.name}", maxLines: 1,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,overflow: TextOverflow.ellipsis),),
+                    subtitle: Text("${homeController.chatUser.isOnline==true?"Online":"Offline"}", maxLines: 1,style: TextStyle(color: Colors.green,overflow: TextOverflow.ellipsis),),
                   ),
                 ),
                 IconButton(onPressed: (){}, icon: Icon(Icons.videocam_outlined,color: Colors.white,size: 25.sp,)),
@@ -57,41 +63,89 @@ class _ChatPageState extends State<ChatPage> {
               child: Column(
                 children: [
                   Expanded(
-                    child: SingleChildScrollView(
-                      reverse: true,
-                      physics: BouncingScrollPhysics(),
-                      child: Padding(
-                        padding: EdgeInsets.only(left: Get.width/30, right: Get.width/30, top: Get.width/15),
-                        child: Column(
-                          children: [
-                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/60,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
-                            SizedBox(height: Get.width/30,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/60,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                            SizedBox(height: Get.width/60,),
-                            MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
-                          ],
-                        ),
-                      ),
+                    // child: SingleChildScrollView(
+                    //   reverse: true,
+                    //   physics: BouncingScrollPhysics(),
+                    //   child: Padding(
+                    //     padding: EdgeInsets.only(left: Get.width/30, right: Get.width/30, top: Get.width/15),
+                    //     child: Column(
+                    //       children: [
+                    //         MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/60,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.FromSendMessage(msg: "How Are You ?"),
+                    //         SizedBox(height: Get.width/30,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/60,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //         SizedBox(height: Get.width/60,),
+                    //         MessageWidget.messageWidget.MeSendMessage(msg: "I'm Fine"),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseHelper.firebaseHelper.ReadMessage(userData: homeController.chatUser.toJson()),
+                      builder: (context, snapshot) {
+                        if(snapshot.hasError)
+                          {
+                            return Center(child: Text("${snapshot.error}",style: TextStyle(color: Colors.black,fontSize: 15.sp,fontWeight: FontWeight.bold),));
+                          }
+                        else if(snapshot.hasData)
+                          {
+                            var docs = snapshot.data!.docs;
+                            chatController.MessageList.value = [];
+                            for(var doc in docs)
+                            {
+                              Map map = doc.data() as Map;
+                              MessageModel UserMessage = MessageModel.fromJson(map);
+                              chatController.MessageList.add(UserMessage);
+                            }
+                            if(chatController.MessageList.isNotEmpty)
+                              {
+                                return Obx(
+                                    () => ListView.builder(
+                                    itemCount: chatController.MessageList.length,
+                                    // addAutomaticKeepAlives: false,
+                                    //   addRepaintBoundaries: true,
+                                    //   addSemanticIndexes: true,
+                                      reverse: true,
+                                    itemBuilder: (context, index) {
+                                      return FirebaseHelper.user!.uid == chatController.MessageList[index].fromId
+                                          ? Padding(
+                                            padding: EdgeInsets.only(right: Get.width/50,bottom: Get.width/40),
+                                            child: MessageWidget.messageWidget.MeSendMessage(message: chatController.MessageList[index],context: context),
+                                          )
+                                          : Padding(
+                                            padding: EdgeInsets.only(left: Get.width/50,bottom: Get.width/40),
+                                            child: MessageWidget.messageWidget.FromSendMessage(message: chatController.MessageList[index],context: context),
+                                          );
+                                    },
+                                  ),
+                                );
+                              }
+                            else
+                              {
+                                return Center(child: Text("Sey Hii..! 👋👋",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 21.sp),),);
+                              }
+                          }
+                        return Center(child: CircularProgressIndicator(color: const Color(0xFF703efe),),);
+                      },
                     ),
                   ),
                   Container(
@@ -127,16 +181,28 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                           ),
                         ),
-                        Container(
-                          height: Get.width/9,
-                          width: Get.width/9,
-                          margin: EdgeInsets.only(right: Get.width/90),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF703efe)
+                        InkWell(
+                          onTap: (){
+                            if(chatController.ChatStart.value)
+                              {
+                                ChatUser chatUser = homeController.chatUser;
+                                Map<String,dynamic> userData = chatUser.toJson();
+                                FirebaseHelper.firebaseHelper.SendMessage(userData: userData, message: chatController.txtChat.text);
+                                chatController.txtChat.text='';
+                                chatController.ChatStart.value =false;
+                              }
+                          },
+                          child: Container(
+                            height: Get.width/9,
+                            width: Get.width/9,
+                            margin: EdgeInsets.only(right: Get.width/90),
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF703efe)
+                            ),
+                            alignment: Alignment.center,
+                            child: Obx(() => Image.asset("${chatController.ChatStart.value ? "assets/image/send.png" : "assets/image/mic.png"}",height: Get.width/15,width: Get.width/15,color: Colors.white,)),
                           ),
-                          alignment: Alignment.center,
-                          child: Obx(() => Image.asset("${chatController.ChatStart.value ? "assets/image/send.png" : "assets/image/mic.png"}",height: Get.width/15,width: Get.width/15,color: Colors.white,)),
                         )
                       ],
                     ),

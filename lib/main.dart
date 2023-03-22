@@ -1,3 +1,4 @@
+import 'package:chat/Screens/AllUsersScreen/View/AllUsersPage.dart';
 import 'package:chat/Screens/ChatScreen/View/ChatPage.dart';
 import 'package:chat/Screens/HomeScreen/View/HomePage.dart';
 import 'package:chat/Screens/SignInScreen/View/SignInPage.dart';
@@ -29,6 +30,7 @@ void main() async {
             'SignUp': (p0) => SignUpPage(),
             'Home': (p0) => HomePage(),
             'Chat': (p0) => ChatPage(),
+            'AllUsers': (p0) => AllUsersPage(),
           },
         );
       },
