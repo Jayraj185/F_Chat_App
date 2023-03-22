@@ -10,7 +10,7 @@ class TimeFormate
 
   String FormateTime(BuildContext context,String time)
   {
-    DateTime dateTime = DateTime.fromMicrosecondsSinceEpoch(int.parse(time));
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     
     return TimeOfDay.fromDateTime(dateTime).format(context);
   }
