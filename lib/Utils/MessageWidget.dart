@@ -36,14 +36,21 @@ class MessageWidget
                   ),
                 ),
               ),
-              Text(
-                "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
-                maxLines: 1,
-                style: TextStyle(
-                    color: Colors.grey,
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 9.sp
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(Icons.done_all,color: message.read!.isEmpty ? Colors.grey : Colors.green,size: 15.sp,),
+                  SizedBox(width: Get.width/90,),
+                  Text(
+                    "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
+                    maxLines: 1,
+                    style: TextStyle(
+                        color: Colors.grey,
+                        overflow: TextOverflow.ellipsis,
+                        fontSize: 9.sp
+                    ),
+                  ),
+                ],
               )
             ],
           ),
@@ -56,7 +63,9 @@ class MessageWidget
   {
     if(message.read!.isEmpty)
       {
-        FirebaseHelper.firebaseHelper.UpdateReadMessage(messageModel: message);
+        MessageModel messageModel = MessageModel(toId: message.toId, fromId: message.fromId, message: message.message, read: DateTime.now().millisecondsSinceEpoch.toString(), sent: message.sent, type: message.type);
+        FirebaseHelper.firebaseHelper.UpdateMessage(messageModel: messageModel);
+        print("========== ${message.read}");
       }
     return Row(
       children: [
@@ -79,18 +88,12 @@ class MessageWidget
                   ),
                 ),
               ),
-              Row(
-                children: [
-                  Icon(Icons.done_all,color: message.read!.isEmpty ? Colors.grey : const Color(0xFF703efe),size: 12.sp,),
-                  SizedBox(width: Get.width/15,),
-                  Text(
-                      "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
-                    style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 9.sp
-                    ),
-                  ),
-                ],
+              Text(
+                  "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 9.sp
+                ),
               )
             ],
           ),

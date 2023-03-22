@@ -265,31 +265,43 @@ class FirebaseHelper
 
     String uniqueId = CreateUniqueId(id: userData['uid']);
 
-    return firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").snapshots();
+    return firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").orderBy('sent',descending: true).snapshots();
   }
 
   //Delete Message in One User Data In Firebase Firestore
   void DeleteMessage({required String id}) async
   {
     UserDetails();
-    await firebaseFirestore.collection("Chats").doc(id).delete();
+    firebaseFirestore.collection("Chats").doc(id).delete();
   }
 
   //Update Message Data In Firebase Firestore
-  void UpdateMessage({required String id, required Map<String,dynamic> userData}) async
-  {
-    UserDetails();
-    await firebaseFirestore.collection("Chats").doc(id).update(userData);
-  }
+  // void UpdateMessage({required String id, required Map<String,dynamic> userData}) async
+  // {
+  //   UserDetails();
+  //   // await firebaseFirestore.collection("Chats").doc(id).update(userData);
+  // }
 
   //Update Message Data Read Or Not In Firebase Firestore
-  void UpdateReadMessage({required MessageModel messageModel}) async
+  void UpdateMessage({required MessageModel messageModel}) async
   {
     UserDetails();
     Map<String,dynamic> userMessage = messageModel.toJson();
-    print("====== ${messageModel.fromId}");
+    String uniqueId = CreateUniqueId(id: messageModel.fromId!);
+    // print("====== ${messageModel.fromId}\n====== MESAGE $userMessage");
+    // print("========= UNIQID $uniqueId ");
+    firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").doc(messageModel.sent).update(userMessage);
+  }
 
-    await firebaseFirestore.collection("Chats").doc(messageModel.fromId).update(userMessage);
+  //Read Last Message In Firebase Firestore
+  Stream<QuerySnapshot<Map<String, dynamic>>> ReadLastMessage({required ChatUser userData})
+  {
+    UserDetails();
+    // return firebaseFirestore.collection('AllUsers').snapshots();
+
+    String uniqueId = CreateUniqueId(id: userData.uid!);
+
+     return firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").orderBy('sent',descending: true).limit(1).snapshots();
   }
 
 

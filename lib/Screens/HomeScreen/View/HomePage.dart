@@ -1,4 +1,5 @@
 import 'package:chat/Screens/AllUsersScreen/Controller/AllUserController.dart';
+import 'package:chat/Screens/ChatScreen/Model/MessageModel.dart';
 import 'package:chat/Screens/HomeScreen/Controller/HomeController.dart';
 import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
 import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
@@ -155,93 +156,99 @@ class _HomePageState extends State<HomePage> {
                               width: Get.width,
                               // color: Colors.red,
                               // alignment: Alignment.centerLeft,
-                              child: Card(
-                                color: const Color(0xFFECF4FF),
-                                elevation: 0,
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: Get.height/23,
-                                      backgroundImage: NetworkImage("${homeController.UserList[index].image}",),
-                                      backgroundColor: Colors.white,
-                                    ),
-                                    Container(
-                                      width: Get.width/1.8,
-                                      color: const Color(0xFFECF4FF),
-                                      // color: Colors.purpleAccent,
-                                      padding: EdgeInsets.only(left: Get.width/30),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${homeController.UserList[index].name}",
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14.sp,
-                                                overflow: TextOverflow.ellipsis,
-                                                fontWeight: FontWeight.bold
-                                            ),
-                                          ),
-                                          SizedBox(height: Get.width/90,),
-                                          Text(
-                                            "${homeController.UserList[index].lastMessage}",
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 12.sp,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      // color: Colors.white,
-                                      width: Get.width/7,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "${homeController.UserList[index].lastActive}",
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 8.sp,
-                                                fontWeight: FontWeight.bold
-                                            ),
-                                          ),
-                                          SizedBox(height: Get.width/100,),
-                                          Container(
-                                            height: Get.height/35,
-                                            width: Get.height/35,
-                                            decoration: const BoxDecoration(
-                                                color: Color(0xFF703efe),
-                                                shape: BoxShape.circle
-                                            ),
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              "3",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 9.sp,
-                                                  fontWeight: FontWeight.bold
+                              child: StreamBuilder(
+                                stream: FirebaseHelper.firebaseHelper.ReadLastMessage(userData: homeController.UserList[index]),
+                                builder: (context, snapshot) {
+                                  var docs = snapshot.data!.docs;
+                                  MessageModel? LastMessage;
+                                  List<MessageModel> lastMessage = [];
+                                  for(var doc in docs)
+                                  {
+                                    Map map = doc.data() as Map;
+                                    lastMessage.add(MessageModel.fromJson(map));
+                                  }
+                                  lastMessage.isNotEmpty ? LastMessage = lastMessage[0]: [];
+                                  return Card(
+                                    color: const Color(0xFFECF4FF),
+                                    elevation: 0,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: Get.height/23,
+                                          backgroundImage: NetworkImage("${homeController.UserList[index].image}",),
+                                          backgroundColor: Colors.white,
+                                        ),
+                                        Container(
+                                          width: Get.width/1.8,
+                                          color: const Color(0xFFECF4FF),
+                                          // color: Colors.purpleAccent,
+                                          padding: EdgeInsets.only(left: Get.width/30),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${homeController.UserList[index].name}",
+                                                maxLines: 1,
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 14.sp,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    fontWeight: FontWeight.bold
+                                                ),
                                               ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                // child: ListTile(
-                                //   leading: CircleAvatar(
-                                //     radius: Get.height/30,
-                                //     backgroundColor: Colors.red,
-                                //   ),
-                                //   title: Text("Dharmik Bhaliya"),
-                                //   subtitle: Text("How Are You ?"),
-                                // ),
+                                              SizedBox(height: Get.width/90,),
+                                              Text(
+                                                "${LastMessage != null ? LastMessage.message : homeController.UserList[index].lastMessage}",
+                                                maxLines: 1,
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 12.sp,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          // color: Colors.white,
+                                          width: Get.width/7,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                "${homeController.UserList[index].lastActive}",
+                                                style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 8.sp,
+                                                    fontWeight: FontWeight.bold
+                                                ),
+                                              ),
+                                              SizedBox(height: Get.width/100,),
+                                              Container(
+                                                height: Get.height/35,
+                                                width: Get.height/35,
+                                                decoration: const BoxDecoration(
+                                                    color: Color(0xFF703efe),
+                                                    shape: BoxShape.circle
+                                                ),
+                                                // alignment: Alignment.center,
+                                                // child: Text(
+                                                //   "3",
+                                                //   style: TextStyle(
+                                                //       color: Colors.white,
+                                                //       fontSize: 9.sp,
+                                                //       fontWeight: FontWeight.bold
+                                                //   ),
+                                                // ),
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           );
