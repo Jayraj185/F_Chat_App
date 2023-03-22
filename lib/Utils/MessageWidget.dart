@@ -1,4 +1,5 @@
 import 'package:chat/Screens/ChatScreen/Model/MessageModel.dart';
+import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:chat/Utils/TimeFormate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,10 @@ class MessageWidget
 
   Widget FromSendMessage({required MessageModel message,required BuildContext context})
   {
+    if(message.read!.isEmpty)
+      {
+        FirebaseHelper.firebaseHelper.UpdateReadMessage(messageModel: message);
+      }
     return Row(
       children: [
         Flexible(
@@ -74,12 +79,18 @@ class MessageWidget
                   ),
                 ),
               ),
-              Text(
-                  "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 9.sp
-                ),
+              Row(
+                children: [
+                  Icon(Icons.done_all,color: message.read!.isEmpty ? Colors.grey : const Color(0xFF703efe),size: 12.sp,),
+                  SizedBox(width: Get.width/15,),
+                  Text(
+                      "${TimeFormate.timeFormate.FormateTime(context, "${message.sent}")}",
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 9.sp
+                    ),
+                  ),
+                ],
               )
             ],
           ),

@@ -282,6 +282,16 @@ class FirebaseHelper
     await firebaseFirestore.collection("Chats").doc(id).update(userData);
   }
 
+  //Update Message Data Read Or Not In Firebase Firestore
+  void UpdateReadMessage({required MessageModel messageModel}) async
+  {
+    UserDetails();
+    Map<String,dynamic> userMessage = messageModel.toJson();
+    print("====== ${messageModel.fromId}");
+
+    await firebaseFirestore.collection("Chats").doc(messageModel.fromId).update(userMessage);
+  }
+
 
 
 
