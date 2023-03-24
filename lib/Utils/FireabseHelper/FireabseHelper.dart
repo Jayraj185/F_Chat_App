@@ -195,6 +195,7 @@ class FirebaseHelper
       isOnline: false,
       lastActive: "Today",
       lastMessage: "Hey Guys....!",
+      Tocken: "",
     );
     Map<String,dynamic> userData = chatUser.toJson();
 

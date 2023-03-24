@@ -18,7 +18,9 @@ class ChatUser {
       String? lastActive, 
       String? id, 
       String? lastMessage, 
-      String? uid,}){
+      String? uid,
+      String? Tocken,
+  }){
     _name = name;
     _email = email;
     _image = image;
@@ -28,6 +30,7 @@ class ChatUser {
     _id = id;
     _lastMessage = lastMessage;
     _uid = uid;
+    _Token = Tocken;
 }
 
   ChatUser.fromJson(dynamic json) {
@@ -40,6 +43,7 @@ class ChatUser {
     _id = json['id'];
     _lastMessage = json['lastMessage'];
     _uid = json['uid'];
+    _Token = json['token'];
   }
   String? _name;
   String? _email;
@@ -50,6 +54,7 @@ class ChatUser {
   String? _id;
   String? _lastMessage;
   String? _uid;
+  String? _Token;
 ChatUser copyWith({  String? name,
   String? email,
   String? image,
@@ -59,6 +64,7 @@ ChatUser copyWith({  String? name,
   String? id,
   String? lastMessage,
   String? uid,
+  String? Token,
 }) => ChatUser(  name: name ?? _name,
   email: email ?? _email,
   image: image ?? _image,
@@ -68,6 +74,7 @@ ChatUser copyWith({  String? name,
   id: id ?? _id,
   lastMessage: lastMessage ?? _lastMessage,
   uid: uid ?? _uid,
+  Tocken: Token ?? _Token,
 );
   String? get name => _name;
   String? get email => _email;
@@ -78,6 +85,7 @@ ChatUser copyWith({  String? name,
   String? get id => _id;
   String? get lastMessage => _lastMessage;
   String? get uid => _uid;
+  String? get Token => _Token;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -90,6 +98,7 @@ ChatUser copyWith({  String? name,
     map['id'] = _id;
     map['lastMessage'] = _lastMessage;
     map['uid'] = _uid;
+    map['token'] = _Token;
     return map;
   }
 
