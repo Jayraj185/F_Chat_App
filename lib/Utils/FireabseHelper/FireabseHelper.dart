@@ -5,8 +5,10 @@ import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
 import 'package:chat/Utils/ToastMessage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseHelper
@@ -19,7 +21,16 @@ class FirebaseHelper
 
   //Create FirebaseAuth Object
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+  //Create FirebaseFirestore Object
   FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+
+  //Create Firebase Messaging Object
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+  //Create Flutter Local Notifications Plugin Object
+  FlutterLocalNotificationsPlugin
+  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   /// =========== ************* LOGIN SYSTEM IN FIREBASE AUTHENTICATION ********** ================
   //SignUp User In FirebaseAuth
@@ -169,11 +180,24 @@ class FirebaseHelper
   }
 
   //Update Chat User Data In Firebase Firestore
-  void UpdateChatUser({required String id, required Map<String,dynamic> userData}) async
+  void UpdateChatUser({required bool isOnline}) async
   {
     UserDetails();
-    await firebaseFirestore.collection("ChatUser").doc(id).update(userData);
+    await firebaseFirestore.collection("ChatUser").doc(user!.uid).update(
+        {
+          'isOnline' : isOnline,
+          'lastActive' : DateTime.now().millisecondsSinceEpoch.toString()
+        });
   }
+
+  //Get User Information In Firebase Firestore
+  Stream<QuerySnapshot<Map<String, dynamic>>> GetUserInfo({required ChatUser chatUser})
+  {
+    UserDetails();
+    return firebaseFirestore.collection("ChatUser").where("uid",isEqualTo: chatUser.uid).snapshots();
+
+  }
+
 
 
 
@@ -185,6 +209,8 @@ class FirebaseHelper
   async {
     UserDetails();
     FirebaseHelper.firebaseHelper.UserDetails();
+    String? token = await FirebaseMessaging.instance.getToken();
+    print("================ TOKEN \n======== $token");
     ChatUser chatUser = ChatUser(
       id: DateTime.now().millisecondsSinceEpoch.toInt().toString(),
       name: FirebaseHelper.user!.displayName,
@@ -193,9 +219,9 @@ class FirebaseHelper
       email: FirebaseHelper.user!.email,
       image: FirebaseHelper.user!.providerData[0].photoURL,
       isOnline: false,
-      lastActive: "Today",
+      lastActive: "${DateTime.now().millisecondsSinceEpoch}",
       lastMessage: "Hey Guys....!",
-      Tocken: "",
+      Tocken: token,
     );
     Map<String,dynamic> userData = chatUser.toJson();
 
@@ -249,7 +275,7 @@ class FirebaseHelper
       fromId: user!.uid,
       sent: time,
       read: "",
-      type: Type.text
+      type: Type.text,
     );
     Map<String,dynamic> userMessage = messageModel.toJson();
 
@@ -270,10 +296,11 @@ class FirebaseHelper
   }
 
   //Delete Message in One User Data In Firebase Firestore
-  void DeleteMessage({required String id}) async
+  void DeleteMessage({required String id, required Map<String,dynamic> userData}) async
   {
     UserDetails();
-    firebaseFirestore.collection("Chats").doc(id).delete();
+    String uniqueId = CreateUniqueId(id: userData['uid']);
+    firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").doc(id).delete();
   }
 
   //Update Message Data In Firebase Firestore
@@ -305,6 +332,64 @@ class FirebaseHelper
      return firebaseFirestore.collection("Chats").doc(uniqueId).collection("Messages").orderBy('sent',descending: true).limit(1).snapshots();
   }
 
+
+
+
+
+
+  /// =================== ************* NOTIFICATION MESSAGES IN FIREBASE FIRESTORE ********** =======================
+
+
+  // Create FirebaseNotification Method
+  Future<void> FirebaseNotification()
+  async {
+    NotificationSettings notificationSettings =
+    await firebaseMessaging.requestPermission(
+      alert: true,
+      provisional: false,
+      criticalAlert: false,
+      announcement: true,
+      badge: true,
+      carPlay: false,
+      sound: true
+    );
+    InitializeNotification();
+    FirebaseMessaging.onMessage.listen((message) {
+      if(message.notification != null)
+        {
+          String? body = message.notification!.body;
+          String? title = message.notification!.title;
+
+          ShowChatNotificationMessage(title: title!, body: body!);
+        }
+    });
+  }
+
+  // Initialize Firebase Notification
+  void InitializeNotification()
+  {
+    AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings("logo");
+    DarwinInitializationSettings iOSInitializationSettings = DarwinInitializationSettings();
+
+    InitializationSettings initializationSettings = InitializationSettings(android: androidInitializationSettings,iOS: iOSInitializationSettings);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Show Chat Notification On Firebase
+  Future<void> ShowChatNotificationMessage({required String title, required String body})
+  async {
+
+    AndroidNotificationDetails androidNotificationDetails = AndroidNotificationDetails("1", "Android",importance: Importance.high,priority: Priority.max);
+
+    DarwinNotificationDetails iOSNotificationDetails = DarwinNotificationDetails();
+
+    NotificationDetails notificationDetails = NotificationDetails(android: androidNotificationDetails,iOS: iOSNotificationDetails);
+
+    await flutterLocalNotificationsPlugin.show(1, title, body, notificationDetails);
+
+
+  }
 
 
 

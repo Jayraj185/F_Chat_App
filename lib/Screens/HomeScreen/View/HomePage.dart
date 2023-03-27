@@ -3,8 +3,12 @@ import 'package:chat/Screens/ChatScreen/Model/MessageModel.dart';
 import 'package:chat/Screens/HomeScreen/Controller/HomeController.dart';
 import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
 import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
+import 'package:chat/Utils/TimeFormate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
@@ -59,6 +63,23 @@ class _HomePageState extends State<HomePage> {
     //         FirebaseHelper.firebaseHelper.CreateUser(userData: userData);
     //       }
     //   }
+
+    FirebaseHelper.firebaseHelper.FirebaseNotification();
+    FirebaseHelper.firebaseHelper.UpdateChatUser(isOnline: true);
+
+    SystemChannels.lifecycle.setMessageHandler((message)  {
+
+      if(message.toString().toLowerCase().contains('resume'))
+        {
+          FirebaseHelper.firebaseHelper.UpdateChatUser(isOnline: true);
+        }
+      else if(message.toString().toLowerCase().contains('pause'))
+        {
+          FirebaseHelper.firebaseHelper.UpdateChatUser(isOnline: false);
+        }
+
+      return Future.value(message);
+    });
 
   }
 
@@ -156,98 +177,111 @@ class _HomePageState extends State<HomePage> {
                               width: Get.width,
                               // color: Colors.red,
                               // alignment: Alignment.centerLeft,
-                              child: StreamBuilder(
+                              child: StreamBuilder<QuerySnapshot>(
                                 stream: FirebaseHelper.firebaseHelper.ReadLastMessage(userData: homeController.UserList[index]),
                                 builder: (context, snapshot) {
-                                  var docs = snapshot.data!.docs;
-                                  MessageModel? LastMessage;
-                                  List<MessageModel> lastMessage = [];
-                                  for(var doc in docs)
-                                  {
-                                    Map map = doc.data() as Map;
-                                    lastMessage.add(MessageModel.fromJson(map));
-                                  }
-                                  lastMessage.isNotEmpty ? LastMessage = lastMessage[0]: [];
-                                  return Card(
-                                    color: const Color(0xFFECF4FF),
-                                    elevation: 0,
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: Get.height/23,
-                                          backgroundImage: NetworkImage("${homeController.UserList[index].image}",),
-                                          backgroundColor: Colors.white,
-                                        ),
-                                        Container(
-                                          width: Get.width/1.8,
+                                  if(snapshot.hasData)
+                                    {
+                                      var docs = snapshot.data!.docs;
+                                      MessageModel? LastMessage;
+                                      List<MessageModel> lastMessage = [];
+                                      for(var doc in docs)
+                                      {
+                                        Map map = doc.data() as Map;
+                                        lastMessage.add(MessageModel.fromJson(map));
+                                      }
+                                      lastMessage.isNotEmpty ? LastMessage = lastMessage[0]: [];
+                                      if(LastMessage != null)
+                                      {
+                                        print("========= ${LastMessage.message}");
+                                      }
+                                      return FocusedMenuHolder(
+                                        menuItems: [
+                                          FocusedMenuItem(title: Text("Delete"), onPressed: (){
+                                            FirebaseHelper.firebaseHelper.DeleteChatUser(id: homeController.UserList[index].uid!);
+                                          })
+                                        ],
+                                        child: Card(
                                           color: const Color(0xFFECF4FF),
-                                          // color: Colors.purpleAccent,
-                                          padding: EdgeInsets.only(left: Get.width/30),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                          elevation: 0,
+                                          child: Row(
                                             children: [
-                                              Text(
-                                                "${homeController.UserList[index].name}",
-                                                maxLines: 1,
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14.sp,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    fontWeight: FontWeight.bold
-                                                ),
+                                              CircleAvatar(
+                                                radius: Get.height/23,
+                                                backgroundImage: NetworkImage("${homeController.UserList[index].image}",),
+                                                backgroundColor: Colors.white,
                                               ),
-                                              SizedBox(height: Get.width/90,),
-                                              Text(
-                                                "${LastMessage != null ? LastMessage.message : homeController.UserList[index].lastMessage}",
-                                                maxLines: 1,
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 12.sp,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          // color: Colors.white,
-                                          width: Get.width/7,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                "${homeController.UserList[index].lastActive}",
-                                                style: TextStyle(
-                                                    color: Colors.grey,
-                                                    fontSize: 8.sp,
-                                                    fontWeight: FontWeight.bold
-                                                ),
-                                              ),
-                                              SizedBox(height: Get.width/100,),
                                               Container(
-                                                height: Get.height/35,
-                                                width: Get.height/35,
-                                                decoration: const BoxDecoration(
-                                                    color: Color(0xFF703efe),
-                                                    shape: BoxShape.circle
+                                                width: Get.width/1.8,
+                                                color: const Color(0xFFECF4FF),
+                                                // color: Colors.purpleAccent,
+                                                padding: EdgeInsets.only(left: Get.width/30),
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "${homeController.UserList[index].name}",
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14.sp,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          fontWeight: FontWeight.bold
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: Get.width/90,),
+                                                    Text(
+                                                      "${LastMessage != null ? LastMessage.message : homeController.UserList[index].about}",
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                        color: Colors.grey,
+                                                        fontSize: 12.sp,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                // alignment: Alignment.center,
-                                                // child: Text(
-                                                //   "3",
-                                                //   style: TextStyle(
-                                                //       color: Colors.white,
-                                                //       fontSize: 9.sp,
-                                                //       fontWeight: FontWeight.bold
-                                                //   ),
-                                                // ),
+                                              ),
+                                              Container(
+                                                // color: Colors.white,
+                                                width: Get.width/7,
+                                                child: LastMessage == null
+                                                    ? null
+                                                    : (LastMessage.read!.isEmpty && LastMessage.fromId != FirebaseHelper.user!.uid)
+                                                    ? Container(
+                                                  height: Get.height/35,
+                                                  width: Get.height/35,
+                                                  decoration: const BoxDecoration(
+                                                      color: Color(0xFF703efe),
+                                                      shape: BoxShape.circle
+                                                  ),
+                                                  // alignment: Alignment.center,
+                                                  // child: Text(
+                                                  //   "3",
+                                                  //   style: TextStyle(
+                                                  //       color: Colors.white,
+                                                  //       fontSize: 9.sp,
+                                                  //       fontWeight: FontWeight.bold
+                                                  //   ),
+                                                  // ),
+                                                )
+                                                    : Text(
+                                                  "${TimeFormate.timeFormate.LastMessageTime(context: context, time: LastMessage.sent!)}",
+                                                  style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 8.sp,
+                                                      fontWeight: FontWeight.bold
+                                                  ),
+                                                ),
                                               )
                                             ],
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                  );
+                                        ),
+                                        onPressed: (){},
+                                      );
+                                    }
+                                  return const Center(child: CircularProgressIndicator(color: Color(0xFF703efe),),);
                                 },
                               ),
                             ),
@@ -255,7 +289,7 @@ class _HomePageState extends State<HomePage> {
                         },
                       );
                     }
-                  return Center(child: CircularProgressIndicator(),);
+                  return const Center(child: CircularProgressIndicator(color: Color(0xFF703efe),),);
                 },
               ),
             ),

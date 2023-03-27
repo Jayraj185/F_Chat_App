@@ -7,6 +7,7 @@
 /// id : "w5TJvu6qSCE1F0uHf0mN"
 /// lastMessage : "hiiii"
 /// uid : "y63NnpwiQIUXeTQERJDKURettor2"
+/// Token : "dgtr56456vfbfgfhfghxcvfertyr"
 
 class ChatUser {
   ChatUser({

@@ -2,10 +2,14 @@ import 'package:chat/Screens/ChatScreen/Controller/ChatController.dart';
 import 'package:chat/Screens/ChatScreen/Model/MessageModel.dart';
 import 'package:chat/Screens/HomeScreen/Controller/HomeController.dart';
 import 'package:chat/Screens/HomeScreen/Model/ChatUser.dart';
+import 'package:chat/Utils/ApiHttp/PostNotification.dart';
 import 'package:chat/Utils/FireabseHelper/FireabseHelper.dart';
 import 'package:chat/Utils/MessageWidget.dart';
+import 'package:chat/Utils/TimeFormate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
@@ -33,23 +37,44 @@ class _ChatPageState extends State<ChatPage> {
             color: const Color(0xFF703efe),
             alignment: Alignment.topCenter,
             padding: EdgeInsets.only(right: Get.width/80,left: Get.width/80,top: Get.width/9),
-            child: Row(
-              children: [
-                IconButton(onPressed: (){Get.back();}, icon: Icon(Icons.arrow_back_ios_new),color: Colors.white,),
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage("${homeController.chatUser.image}"),
-                  radius: Get.width/15,
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: Text("${homeController.chatUser.name}", maxLines: 1,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,overflow: TextOverflow.ellipsis),),
-                    subtitle: Text("${homeController.chatUser.isOnline==true?"Online":"Offline"}", maxLines: 1,style: TextStyle(color: Colors.green,overflow: TextOverflow.ellipsis),),
-                  ),
-                ),
-                IconButton(onPressed: (){}, icon: Icon(Icons.videocam_outlined,color: Colors.white,size: 25.sp,)),
-                IconButton(onPressed: (){}, icon: Icon(Icons.call_outlined,color: Colors.white,size: 21.sp,)),
-              ],
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseHelper.firebaseHelper.GetUserInfo(chatUser: homeController.chatUser),
+              builder: (context, snapshot) {
+                if(snapshot.hasData)
+                  {
+                    var docs = snapshot.data!.docs;
+                    chatController.chatList.value = [];
+                    for(var doc in docs)
+                    {
+                      Map map = doc.data() as Map;
+                      ChatUser chatUser = ChatUser.fromJson(map);
+                      chatController.chatList.add(chatUser);
+                    }
+                    return Row(
+                      children: [
+                        IconButton(onPressed: (){Get.back();}, icon: Icon(Icons.arrow_back_ios_new),color: Colors.white,),
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          backgroundImage: NetworkImage("${chatController.chatList.isNotEmpty ? chatController.chatList[0].image : homeController.chatUser.image}"),
+                          radius: Get.width/17,
+                        ),
+                        Expanded(
+                          child: ListTile(
+                            title: Text("${chatController.chatList.isNotEmpty ? chatController.chatList[0].name : homeController.chatUser.name}", maxLines: 1,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,overflow: TextOverflow.ellipsis),),
+                            subtitle: Text("${chatController.chatList.isNotEmpty ? chatController.chatList[0].isOnline == true ? "Online" : TimeFormate.timeFormate.LastActiveTime(context: context, time: chatController.chatList[0].lastActive!) : TimeFormate.timeFormate.LastActiveTime(context: context, time: homeController.chatUser.lastActive!)}", maxLines: 1,style: TextStyle(color: chatController.chatList.isNotEmpty ? chatController.chatList[0].isOnline == true ? Colors.green : Colors.grey : Colors.grey,overflow: TextOverflow.ellipsis),),
+                          ),
+                        ),
+                        Icon(Icons.videocam_outlined,color: Colors.white,size: 25.sp,),
+                        SizedBox(width: Get.width/45,),
+                        Icon(Icons.call_outlined,color: Colors.white,size: 21.sp,),
+                        SizedBox(width: Get.width/30,),
+                        // IconButton(onPressed: (){}, icon: Icon(Icons.videocam_outlined,color: Colors.white,size: 25.sp,)),
+                        // IconButton(onPressed: (){}, icon: Icon(Icons.call_outlined,color: Colors.white,size: 21.sp,)),
+                      ],
+                    );
+                  }
+                return const Center(child: CircularProgressIndicator(color: Color(0xFF703efe),),);
+              },
             )
           ),
           Expanded(
@@ -129,11 +154,34 @@ class _ChatPageState extends State<ChatPage> {
                                       return FirebaseHelper.user!.uid == chatController.MessageList[index].fromId
                                           ? Padding(
                                             padding: EdgeInsets.only(right: Get.width/50,bottom: Get.width/40),
-                                            child: MessageWidget.messageWidget.MeSendMessage(message: chatController.MessageList[index],context: context),
+                                            child: FocusedMenuHolder(
+                                              menuItems: [
+                                                FocusedMenuItem(
+                                                  title: Text("Delete"),
+                                                  onPressed: (){
+                                                    FirebaseHelper.firebaseHelper.DeleteMessage(id: chatController.MessageList[index].sent!,userData: chatController.chatList.isNotEmpty ? chatController.chatList[0].toJson() : homeController.chatUser.toJson());
+                                                  }
+                                                )
+                                              ],
+                                              child: MessageWidget.messageWidget.MeSendMessage(message: chatController.MessageList[index],context: context),
+                                              onPressed: (){},
+                                            ),
                                           )
                                           : Padding(
                                             padding: EdgeInsets.only(left: Get.width/50,bottom: Get.width/40),
-                                            child: MessageWidget.messageWidget.FromSendMessage(message: chatController.MessageList[index],context: context),
+                                            child: FocusedMenuHolder(
+                                              menuItems: [
+                                                FocusedMenuItem(
+                                                    title: Text("Delete"),
+                                                    onPressed: (){
+                                                      FirebaseHelper.firebaseHelper.DeleteMessage(id: chatController.MessageList[index].sent!,userData: chatController.chatList.isNotEmpty ? chatController.chatList[0].toJson() : homeController.chatUser.toJson());
+                                                    }
+                                                )
+                                              ],
+                                              child: MessageWidget.messageWidget.FromSendMessage(message: chatController.MessageList[index],context: context),
+                                              onPressed: (){},
+                                            ),
+                                            // child: MessageWidget.messageWidget.FromSendMessage(message: chatController.MessageList[index],context: context),
                                           );
                                     },
                                   ),
@@ -187,7 +235,15 @@ class _ChatPageState extends State<ChatPage> {
                               {
                                 ChatUser chatUser = homeController.chatUser;
                                 Map<String,dynamic> userData = chatUser.toJson();
-                                FirebaseHelper.firebaseHelper.SendMessage(userData: userData, message: chatController.txtChat.text);
+                                if(chatController.chatList[0].isOnline == true)
+                                  {
+                                    FirebaseHelper.firebaseHelper.SendMessage(userData: userData, message: chatController.txtChat.text);
+                                  }
+                                else
+                                  {
+                                    ApiHttp.apiHttp.PostNotification(title: homeController.chatUser.name!, body: chatController.txtChat.text, token: homeController.chatUser.Token!);
+                                    FirebaseHelper.firebaseHelper.SendMessage(userData: userData, message: chatController.txtChat.text);
+                                  }
                                 chatController.txtChat.text='';
                                 chatController.ChatStart.value =false;
                               }
