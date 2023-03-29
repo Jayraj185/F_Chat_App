@@ -241,7 +241,7 @@ class _ChatPageState extends State<ChatPage> {
                                   }
                                 else
                                   {
-                                    ApiHttp.apiHttp.PostNotification(title: homeController.chatUser.name!, body: chatController.txtChat.text, token: homeController.chatUser.Token!);
+                                    ApiHttp.apiHttp.PostNotification(title: FirebaseHelper.user!.displayName!, body: chatController.txtChat.text, token: homeController.chatUser.Token!);
                                     FirebaseHelper.firebaseHelper.SendMessage(userData: userData, message: chatController.txtChat.text);
                                   }
                                 chatController.txtChat.text='';

@@ -167,40 +167,40 @@ class _HomePageState extends State<HomePage> {
                         physics: const BouncingScrollPhysics(),
                         itemCount: homeController.UserList.length,
                         itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: (){
-                              homeController.chatUser = homeController.UserList[index];
-                              Get.toNamed('Chat');
-                            },
-                            child: Container(
-                              height: Get.height/9,
-                              width: Get.width,
-                              // color: Colors.red,
-                              // alignment: Alignment.centerLeft,
-                              child: StreamBuilder<QuerySnapshot>(
-                                stream: FirebaseHelper.firebaseHelper.ReadLastMessage(userData: homeController.UserList[index]),
-                                builder: (context, snapshot) {
-                                  if(snapshot.hasData)
+                          return Container(
+                            height: Get.height/9,
+                            width: Get.width,
+                            // color: Colors.red,
+                            // alignment: Alignment.centerLeft,
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseHelper.firebaseHelper.ReadLastMessage(userData: homeController.UserList[index]),
+                              builder: (context, snapshot) {
+                                if(snapshot.hasData)
+                                  {
+                                    var docs = snapshot.data!.docs;
+                                    MessageModel? LastMessage;
+                                    List<MessageModel> lastMessage = [];
+                                    for(var doc in docs)
                                     {
-                                      var docs = snapshot.data!.docs;
-                                      MessageModel? LastMessage;
-                                      List<MessageModel> lastMessage = [];
-                                      for(var doc in docs)
-                                      {
-                                        Map map = doc.data() as Map;
-                                        lastMessage.add(MessageModel.fromJson(map));
-                                      }
-                                      lastMessage.isNotEmpty ? LastMessage = lastMessage[0]: [];
-                                      if(LastMessage != null)
-                                      {
-                                        print("========= ${LastMessage.message}");
-                                      }
-                                      return FocusedMenuHolder(
-                                        menuItems: [
-                                          FocusedMenuItem(title: Text("Delete"), onPressed: (){
-                                            FirebaseHelper.firebaseHelper.DeleteChatUser(id: homeController.UserList[index].uid!);
-                                          })
-                                        ],
+                                      Map map = doc.data() as Map;
+                                      lastMessage.add(MessageModel.fromJson(map));
+                                    }
+                                    lastMessage.isNotEmpty ? LastMessage = lastMessage[0]: [];
+                                    if(LastMessage != null)
+                                    {
+                                      print("========= ${LastMessage.message}");
+                                    }
+                                    return FocusedMenuHolder(
+                                      menuItems: [
+                                        FocusedMenuItem(title: Text("Delete"), onPressed: (){
+                                          FirebaseHelper.firebaseHelper.DeleteChatUser(id: homeController.UserList[index].uid!);
+                                        })
+                                      ],
+                                      child: InkWell(
+                                        onTap: (){
+                                          homeController.chatUser = homeController.UserList[index];
+                                          Get.toNamed('Chat');
+                                        },
                                         child: Card(
                                           color: const Color(0xFFECF4FF),
                                           elevation: 0,
@@ -278,12 +278,12 @@ class _HomePageState extends State<HomePage> {
                                             ],
                                           ),
                                         ),
-                                        onPressed: (){},
-                                      );
-                                    }
-                                  return const Center(child: CircularProgressIndicator(color: Color(0xFF703efe),),);
-                                },
-                              ),
+                                      ),
+                                      onPressed: (){},
+                                    );
+                                  }
+                                return const Center(child: CircularProgressIndicator(color: Color(0xFF703efe),),);
+                              },
                             ),
                           );
                         },
